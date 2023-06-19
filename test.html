@@ -2,6 +2,12 @@
 <html>
 <head>
     <title>調用鏡頭的網頁</title>
+    <style>
+        #videoElement {
+            width: 100%; /* 使用100%寬度填滿父容器 */
+            height: auto; /* 自動計算高度以維持影像比例 */
+        }
+    </style>
 </head>
 <body>
     <h1>調用鏡頭的網頁</h1>
@@ -9,15 +15,11 @@
     <video id="videoElement" autoplay></video>
     
     <script>
-        // 取得video元素
         var video = document.getElementById('videoElement');
         
-        // 檢查瀏覽器是否支援getUserMedia
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // 使用getUserMedia調用鏡頭
             navigator.mediaDevices.getUserMedia({ video: true })
                 .then(function(stream) {
-                    // 將鏡頭的串流設定給video元素
                     video.srcObject = stream;
                 })
                 .catch(function(error) {
