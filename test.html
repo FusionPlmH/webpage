@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>調用鏡頭的網頁</title>
+</head>
+<body>
+    <h1>調用鏡頭的網頁</h1>
+    
+    <video id="videoElement" autoplay></video>
+    
+    <script>
+        // 取得video元素
+        var video = document.getElementById('videoElement');
+        
+        // 檢查瀏覽器是否支援getUserMedia
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // 使用getUserMedia調用鏡頭
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    // 將鏡頭的串流設定給video元素
+                    video.srcObject = stream;
+                })
+                .catch(function(error) {
+                    console.log('無法取得鏡頭的串流: ', error);
+                });
+        } else {
+            console.log('瀏覽器不支援getUserMedia');
+        }
+    </script>
+</body>
+</html>
