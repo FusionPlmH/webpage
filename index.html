@@ -41,6 +41,20 @@
       border-radius: 4px;
       cursor: pointer;
     }
+
+    @media (max-width: 1024px) and (orientation: landscape) {
+      #videoContainer {
+        width: 100vh;
+        height: 100vw;
+      }
+
+      #videoElement {
+        transform-origin: top left;
+        transform: translate(-50%, -50%) rotate(-90deg);
+        width: 100vh;
+        height: 100vw;
+      }
+    }
   </style>
 </head>
 
@@ -97,19 +111,15 @@
       const heightRatio = containerHeight / videoHeight;
       const scale = Math.min(widthRatio, heightRatio);
 
-      videoElement.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotationAngle}deg)`;
+      videoElement.style.transform = `translate(-50%, -50%) rotate(${rotationAngle}deg) scale(${scale})`;
     }
 
     function rotateVideo() {
-      rotationAngle = (rotationAngle + 90) % 360;
-      handleResize();
+      rotationAngle += 90;
+      videoElement.style.transform = `translate(-50%, -50%) rotate(${rotationAngle}deg)`;
     }
 
-    window.addEventListener('resize', () => {
-      handleResize();
-      startCamera();
-    });
-
+    window.addEventListener('resize', handleResize);
     startCamera();
   </script>
 </body>
