@@ -4,27 +4,66 @@
     <title>調用鏡頭的網頁</title>
     <style>
         #videoElement {
-            width: 100%; /* 使用100%寬度填滿父容器 */
-            height: auto; /* 自動計算高度以維持影像比例 */
+            width: 100%;
+            height: auto;
         }
     </style>
 </head>
 <body>
     <h1>調用鏡頭的網頁</h1>
     
+    <select id="cameraSelect"></select>
+    <br>
     <video id="videoElement" autoplay></video>
     
     <script>
         var video = document.getElementById('videoElement');
+        var cameraSelect = document.getElementById('cameraSelect');
         
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    video.srcObject = stream;
+            // 列出所有的媒體設備
+            navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    var cameras = devices.filter(function(device) {
+                        return device.kind === 'videoinput';
+                    });
+                    
+                    // 將每個鏡頭選項加入選單中
+                    cameras.forEach(function(camera) {
+                        var option = document.createElement('option');
+                        option.value = camera.deviceId;
+                        option.text = camera.label || 'Camera ' + (cameraSelect.length + 1);
+                        cameraSelect.appendChild(option);
+                    });
+                    
+                    // 選擇鏡頭來源
+                    cameraSelect.onchange = function() {
+                        var selectedCameraId = cameraSelect.value;
+                        startCamera(selectedCameraId);
+                    };
+                    
+                    // 預設使用第一個鏡頭
+                    if (cameras.length > 0) {
+                        var defaultCameraId = cameras[0].deviceId;
+                        startCamera(defaultCameraId);
+                    } else {
+                        console.log('找不到可用的鏡頭');
+                    }
                 })
                 .catch(function(error) {
-                    console.log('無法取得鏡頭的串流: ', error);
+                    console.log('無法取得媒體設備: ', error);
                 });
+            
+            // 開始使用選擇的鏡頭
+            function startCamera(cameraId) {
+                navigator.mediaDevices.getUserMedia({ video: { deviceId: cameraId } })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                    })
+                    .catch(function(error) {
+                        console.log('無法取得鏡頭的串流: ', error);
+                    });
+            }
         } else {
             console.log('瀏覽器不支援getUserMedia');
         }
