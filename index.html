@@ -30,16 +30,32 @@
       width: auto;
       height: auto;
     }
+
+    #rotateButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 10px;
+      background-color: #ffffff;
+      border: 1px solid #000000;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
   <div id="videoContainer">
     <video id="videoElement" autoplay></video>
+    <button id="rotateButton">旋转</button>
   </div>
 
   <script>
     const videoElement = document.getElementById('videoElement');
+    const rotateButton = document.getElementById('rotateButton');
+    let rotationAngle = 0;
+
+    rotateButton.addEventListener('click', rotateVideo);
 
     async function startCamera() {
       try {
@@ -67,7 +83,12 @@
       const heightRatio = containerHeight / videoHeight;
       const scale = Math.min(widthRatio, heightRatio);
 
-      videoElement.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      videoElement.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotationAngle}deg)`;
+    }
+
+    function rotateVideo() {
+      rotationAngle = (rotationAngle + 90) % 360;
+      handleResize();
     }
 
     window.addEventListener('resize', handleResize);
