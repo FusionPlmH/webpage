@@ -24,7 +24,7 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(0deg);
+      transform: translate(-50%, -50%);
       max-width: 100%;
       max-height: 100%;
       width: auto;
@@ -88,8 +88,8 @@
     }
 
     function handleResize() {
-      const containerWidth = videoContainer.offsetWidth;
-      const containerHeight = videoContainer.offsetHeight;
+      const containerWidth = window.innerWidth;
+      const containerHeight = window.innerHeight;
       const videoWidth = videoElement.videoWidth;
       const videoHeight = videoElement.videoHeight;
 
@@ -109,8 +109,6 @@
       handleResize();
       startCamera();
     });
-
-    videoElement.addEventListener('loadedmetadata', handleResize);
 
     startCamera();
   </script>
