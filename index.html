@@ -2,124 +2,136 @@
 <html>
 
 <head>
-  <title>摄像头和麦克风测试</title>
+  <title>Camera and Microphone Test</title>
   <style>
-    video {
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f1f1;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .video-container {
+      position: relative;
       width: 100%;
-      max-width: 400px;
-      margin-bottom: 10px;
-      transform-origin: top left;
+      padding-bottom: 56.25%;
     }
 
-    .rotated {
-      transform: rotate(90deg);
+    video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .rotated180 {
-      transform: rotate(180deg);
+    .controls-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .rotate-buttons-container {
+      display: flex;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      background-color: #4caf50;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    button:active {
+      background-color: #3e8e41;
     }
   </style>
 </head>
 
 <body>
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <h1>摄像头和麦克风测试</h1>
-    <div>
+  <div class="container">
+    <h1>Camera and Microphone Test</h1>
+    <div class="video-container">
       <video id="videoElement" autoplay></video>
-      <audio id="audioElement" autoplay></audio>
     </div>
-    <br>
-    <button onclick="startCamera()" style="width: 100%;">启动画面捕获</button>
-    <br>
-    <button onclick="startMicrophone()" style="width: 100%;">启动声音捕获</button>
-    <br>
-    <br>
-    <div id="rotateButtonsContainer">
-      <button id="rotateLeftButton" onclick="rotateLeft()">左转90°</button>
-      <button id="rotateRightButton" onclick="rotateRight()">右转90°</button>
+    <div class="controls-container">
+      <button onclick="startCamera()">Start Video Capture</button>
+      <button onclick="startMicrophone()">Start Audio Capture</button>
+      <div class="rotate-buttons-container">
+        <button onclick="rotateLeft()">Rotate Left 90°</button>
+        <button onclick="rotateRight()">Rotate Right 90°</button>
+      </div>
     </div>
-    <br>
-    <button onclick="toggleFullscreen()" style="width: 100%;">全屏</button>
-
-    <script>
-      const videoElement = document.getElementById('videoElement');
-      const audioElement = document.getElementById('audioElement');
-      let mediaStream;
-      let rotationAngle = 0;
-
-      async function populateDevices() {
-        try {
-          const devices = await navigator.mediaDevices.enumerateDevices();
-
-          devices.forEach((device) => {
-            const option = document.createElement('option');
-            option.value = device.deviceId;
-            option.text = device.label;
-
-            if (device.kind === 'videoinput') {
-              videoElement.srcObject = mediaStream;
-            } else if (device.kind === 'audioinput') {
-              audioElement.srcObject = mediaStream;
-            }
-          });
-        } catch (error) {
-          console.error('无法获取设备列表：', error);
-        }
-      }
-
-      async function startCamera() {
-        try {
-          mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-          videoElement.srcObject = mediaStream;
-        } catch (error) {
-          console.error('访问摄像头出错：', error);
-        }
-      }
-
-      async function startMicrophone() {
-        try {
-          mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          audioElement.srcObject = mediaStream;
-        } catch (error) {
-          console.error('访问麦克风出错：', error);
-        }
-      }
-
-      function rotateLeft() {
-        rotationAngle = (rotationAngle - 90) % 360;
-        updateRotation();
-      }
-
-      function rotateRight() {
-        rotationAngle = (rotationAngle + 90) % 360;
-        updateRotation();
-      }
-
-      function updateRotation() {
-        videoElement.style.transform = `rotate(${rotationAngle}deg)`;
-        videoElement.classList.remove('rotated', 'rotated180');
-        if (rotationAngle === 90) {
-          videoElement.classList.add('rotated');
-        } else if (rotationAngle === 180) {
-          videoElement.classList.add('rotated180');
-        }
-      }
-
-      function toggleFullscreen() {
-        if (videoElement.requestFullscreen) {
-          videoElement.requestFullscreen();
-        } else if (videoElement.mozRequestFullScreen) {
-          videoElement.mozRequestFullScreen();
-        } else if (videoElement.webkitRequestFullscreen) {
-          videoElement.webkitRequestFullscreen();
-        } else if (videoElement.msRequestFullscreen) {
-          videoElement.msRequestFullscreen();
-        }
-      }
-
-      populateDevices();
-    </script>
   </div>
+
+  <script>
+    const videoElement = document.getElementById('videoElement');
+    let mediaStream;
+    let rotationAngle = 0;
+
+    async function startCamera() {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        videoElement.srcObject = mediaStream;
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+      }
+    }
+
+    async function startMicrophone() {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Play audio to start audio capture
+        const audioElement = new Audio();
+        audioElement.srcObject = mediaStream;
+        audioElement.play();
+      } catch (error) {
+        console.error('Error accessing microphone:', error);
+      }
+    }
+
+    function rotateLeft() {
+      rotationAngle = (rotationAngle - 90) % 360;
+      updateRotation();
+    }
+
+    function rotateRight() {
+      rotationAngle = (rotationAngle + 90) % 360;
+      updateRotation();
+    }
+
+    function updateRotation() {
+      videoElement.style.transform = `rotate(${rotationAngle}deg)`;
+    }
+  </script>
 </body>
 
 </html>
