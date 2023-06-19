@@ -6,6 +6,8 @@
         #videoElement {
             width: 100%;
             height: auto;
+            transform: rotate(0deg); /* 初始旋轉角度為0度 */
+            transition: transform 0.5s; /* 加入過渡效果 */
         }
     </style>
 </head>
@@ -17,6 +19,8 @@
     <select id="resolutionSelect"></select>
     <br>
     <select id="frameRateSelect"></select>
+    <br>
+    <button onclick="rotateCamera()">旋轉鏡頭</button>
     <br>
     <video id="videoElement" autoplay></video>
     
@@ -87,6 +91,13 @@
                     .catch(function(error) {
                         console.log('無法取得鏡頭的串流: ', error);
                     });
+            }
+            
+            // 旋轉鏡頭
+            function rotateCamera() {
+                var currentRotation = parseInt(video.style.transform.replace('rotate(', '').replace('deg)', ''));
+                var newRotation = (currentRotation + 90) % 360;
+                video.style.transform = 'rotate(' + newRotation + 'deg)';
             }
         } else {
             console.log('瀏覽器不支援getUserMedia');
