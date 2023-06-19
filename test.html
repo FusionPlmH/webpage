@@ -26,6 +26,164 @@
             border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>調用鏡頭的網頁</h1>
+    
+    <div id="videoWrapper">
+        <video id="videoElement" autoplay onclick="toggleFullscreen()"></video>
+    </div>
+    
+    <div id="deviceSelectors"></div>
+    
+    <button onclick="rotateVideo()">旋轉畫面</button>
+    
+    <script>
+        var video = document.getElementById('videoElement');
+        var videoWrapper = document.getElementById('videoWrapper');
+        var currentRotation = 0;
+        
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // 列出所有的媒體設備
+            navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    var videoDevices = devices.filter(function(device) {
+                        return device.kind === 'videoinput';
+                    });
+                    
+                    // 選擇鏡頭來源
+                    var deviceSelectors = document.getElementById('deviceSelectors');
+                    videoDevices.forEach(function(device) {
+                        var button = document.createElement('button');
+                        button.textContent = device.label || 'Camera ' + (deviceSelectors.children.length + 1);
+                        button.onclick = function() {
+                            startCamera(device.deviceId);
+                        };
+                        deviceSelectors.appendChild(button);
+                    });
+                    
+                    // 預設使用第一個鏡頭
+                    if (videoDevices.length > 0) {
+                        var defaultCameraId = videoDevices[0].deviceId;
+                        startCamera(defaultCameraId);
+                    } else {
+                        console.log('找不到可用的鏡頭');
+                    }
+                })
+                .catch(function(error) {
+                    console.log('無法取得媒體設備: ', error);
+                });
+            
+            // 開始使用選擇的鏡頭
+            function startCamera(cameraId) {
+                var constraints = {
+                    video: { deviceId: cameraId }
+                };
+                
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                        resizeVideo();
+                    })
+                    .catch(function(error) {
+                        console.log('無法取得鏡頭的串流: ', error);
+                    });
+            }
+            
+            // 旋轉影像輸出
+            function rotateVideo() {
+                currentRotation += 90;
+                video.style.transform = 'rotate(' + currentRotation + 'deg)';
+                resizeVideo();
+            }
+            
+            // 切換全屏模式
+            function toggleFullscreen() {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.mozRequestFullScreen) { // Firefox
+                    video.mozRequestFullScreen();
+                } else if (video.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) { // IE/Edge
+                    video.msRequestFullscreen();
+                }
+            }
+            
+            // 調整視頻尺寸
+            function resizeVideo() {
+                var wrapperWidth = videoWrapper.offsetWidth;
+                var wrapperHeight = videoWrapper.offsetHeight;
+                var videoWidth = video.videoWidth;
+                var videoHeight = video.videoHeight;
+                var widthRatio = wrapperWidth / videoWidth;
+                var heightRatio = wrapperHeight / videoHeight;
+                var scaleRatio = Math.min(widthRatio, heightRatio);
+                var newWidth = videoWidth * scaleRatio;
+                var newHeight = videoHeight * scaleRatio;
+                video.style.width = newWidth + 'px';
+                video.style.height = newHeight + 'px';
+            }
+            
+            // 監聽窗口大小變化
+            window.addEventListener('resize', function() {
+                resizeVideo();
+            });
+        } else {
+            console.log('瀏覽器不支援 getUserMedia');
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html>
+<head>
+    <title>調用鏡頭的網頁</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333333;
+            text-align: center;
+        }
+        
+        #videoWrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #videoElement {
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
         }
         
         button {
