@@ -2,177 +2,56 @@
 <html>
 
 <head>
-  <title>Camera and Microphone Test</title>
+  <title>Video Input Test</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f1f1f1;
-      padding: 20px;
       margin: 0;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      height: 90vh;
+      padding: 0;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    .video-container {
-      position: relative;
-      width: 100%;
-      padding-bottom: 56.25%;
+      height: 100vh;
+      overflow: hidden;
     }
 
     video {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .controls-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 20px;
-    }
-
-    .rotate-buttons-container {
-      display: flex;
+      transform-origin: center center;
+      transition: transform 0.3s ease;
     }
 
     button {
-      padding: 8px 12px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 24px;
       border: none;
       border-radius: 4px;
       background-color: #4caf50;
       color: #fff;
+      font-size: 16px;
       cursor: pointer;
     }
 
     button:hover {
       background-color: #45a049;
     }
-
-    button:active {
-      background-color: #3e8e41;
-    }
-
-    .source-list {
-      margin-top: 20px;
-    }
-
-    .source-list ul {
-      list-style-type: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .source-list li {
-      margin-bottom: 5px;
-    }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>Camera and Microphone Test</h1>
-    <div class="video-container">
-      <video id="videoElement" autoplay></video>
-    </div>
-    <div class="controls-container">
-      <button id="startButton">Start</button>
-      <button id="stopButton" disabled>Stop</button>
-      <div class="rotate-buttons-container">
-        <button onclick="rotateLeft()">Rotate Left 90°</button>
-        <button onclick="rotateRight()">Rotate Right 90°</button>
-      </div>
-    </div>
-    <div class="source-list">
-      <p>Available Sources:</p>
-      <ul id="sourceList"></ul>
-    </div>
-  </div>
+  <video id="videoElement" autoplay></video>
+  <button id="rotateButton" onclick="rotateVideo()">Rotate 90°</button>
 
   <script>
     const videoElement = document.getElementById('videoElement');
-    const startButton = document.getElementById('startButton');
-    const stopButton = document.getElementById('stopButton');
-    const sourceList = document.getElementById('sourceList');
-    let mediaStream;
+    const rotateButton = document.getElementById('rotateButton');
     let rotationAngle = 0;
 
-    async function startCamera() {
-      try {
-        const constraints = {
-          video: {
-            deviceId: getSelectedDeviceId('videoSelect')
-          }
-        };
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoElement.srcObject = mediaStream;
-        startButton.disabled = true;
-        stopButton.disabled = false;
-      } catch (error) {
-        console.error('Error accessing camera:', error);
-      }
-    }
-
-    function stopCamera() {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-        videoElement.srcObject = null;
-        startButton.disabled = false;
-        stopButton.disabled = true;
-      }
-    }
-
-    async function populateDevices() {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        devices.forEach((device) => {
-          const option = document.createElement('option');
-          option.value = device.deviceId;
-          option.text = device.label || `Source ${device.deviceId}`;
-
-          if (device.kind === 'videoinput') {
-            videoSelect.appendChild(option);
-          } else if (device.kind === 'audioinput') {
-            audioSelect.appendChild(option);
-          }
-        });
-      } catch (error) {
-        console.error('Error populating devices:', error);
-      }
-    }
-
-    function getSelectedDeviceId(selectId) {
-      const selectElement = document.getElementById(selectId);
-      return selectElement.value;
-    }
-
-    function rotateLeft() {
-      rotationAngle = (rotationAngle - 90) % 360;
-      updateRotation();
-    }
-
-    function rotateRight() {
+    function rotateVideo() {
       rotationAngle = (rotationAngle + 90) % 360;
       updateRotation();
     }
@@ -181,10 +60,22 @@
       videoElement.style.transform = `rotate(${rotationAngle}deg)`;
     }
 
-    startButton.addEventListener('click', startCamera);
-    stopButton.addEventListener('click', stopCamera);
+    function handleResize() {
+      const { width, height } = document.body.getBoundingClientRect();
+      const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight;
 
-    populateDevices();
+      if (width / height > videoAspectRatio) {
+        videoElement.style.width = '100%';
+        videoElement.style.height = 'auto';
+      } else {
+        videoElement.style.width = 'auto';
+        videoElement.style.height = '100%';
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    handleResize();
   </script>
 </body>
 
