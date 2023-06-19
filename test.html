@@ -15,12 +15,17 @@
             text-align: center;
         }
         
+        #videoWrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
         #videoElement {
-            display: block;
-            margin: 0 auto;
             border: 1px solid #cccccc;
             border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
         }
         
         button {
@@ -45,12 +50,16 @@
 <body>
     <h1>調用鏡頭的網頁</h1>
     
-    <button onclick="rotateCamera()">旋轉鏡頭</button>
-    <br>
-    <video id="videoElement" autoplay></video>
+    <div id="videoWrapper">
+        <video id="videoElement" autoplay></video>
+    </div>
+    
+    <button onclick="rotateVideo()">旋轉畫面</button>
     
     <script>
         var video = document.getElementById('videoElement');
+        var videoWrapper = document.getElementById('videoWrapper');
+        var currentRotation = 0;
         
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             // 列出所有的媒體設備
@@ -101,14 +110,13 @@
                     });
             }
             
-            // 旋轉鏡頭
-            function rotateCamera() {
-                var currentRotation = parseInt(video.style.transform.replace('rotate(', '').replace('deg)', ''));
-                var newRotation = (currentRotation + 90) % 360;
-                video.style.transform = 'rotate(' + newRotation + 'deg)';
+            // 旋轉影像輸出
+            function rotateVideo() {
+                currentRotation += 90;
+                videoWrapper.style.transform = 'rotate(' + currentRotation + 'deg)';
             }
         } else {
-            console.log('瀏覽器不支援getUserMedia');
+            console.log('瀏覽器不支援 getUserMedia');
         }
     </script>
 </body>
