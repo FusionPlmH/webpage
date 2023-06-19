@@ -24,24 +24,11 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(0deg);
+      transform: translate(-50%, -50%);
       max-width: 100%;
       max-height: 100%;
       width: auto;
       height: auto;
-      transition: transform 0.3s ease;
-    }
-
-    #rotateButton {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 10px;
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
     }
   </style>
 </head>
@@ -50,20 +37,16 @@
   <div id="videoContainer">
     <video id="videoElement" autoplay></video>
   </div>
-  
-  <button id="rotateButton">Rotate</button>
 
   <script>
     const videoElement = document.getElementById('videoElement');
-    const rotateButton = document.getElementById('rotateButton');
-    let rotationAngle = 0;
 
     async function startCamera() {
       try {
         const constraints = {
           video: {
-            width: { max: 1920 },
-            height: { max: 1080 },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
             aspectRatio: 16 / 9
           }
         };
@@ -84,15 +67,9 @@
       const heightRatio = containerHeight / videoHeight;
       const scale = Math.min(widthRatio, heightRatio);
 
-      videoElement.style.transform = `translate(-50%, -50%) rotate(${rotationAngle}deg) scale(${scale})`;
+      videoElement.style.transform = `translate(-50%, -50%) scale(${scale})`;
     }
 
-    function rotateVideo() {
-      rotationAngle = (rotationAngle + 90) % 360;
-      videoElement.style.transform = `translate(-50%, -50%) rotate(${rotationAngle}deg)`;
-    }
-
-    rotateButton.addEventListener('click', rotateVideo);
     window.addEventListener('resize', handleResize);
 
     startCamera();
