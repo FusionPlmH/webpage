@@ -51,7 +51,7 @@
     <h1>調用鏡頭的網頁</h1>
     
     <div id="videoWrapper">
-        <video id="videoElement" autoplay></video>
+        <video id="videoElement" autoplay onclick="toggleFullscreen()"></video>
     </div>
     
     <button onclick="rotateVideo()">旋轉畫面</button>
@@ -113,7 +113,20 @@
             // 旋轉影像輸出
             function rotateVideo() {
                 currentRotation += 90;
-                videoWrapper.style.transform = 'rotate(' + currentRotation + 'deg)';
+                video.style.transform = 'rotate(' + currentRotation + 'deg)';
+            }
+            
+            // 切換全屏模式
+            function toggleFullscreen() {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.mozRequestFullScreen) { // Firefox
+                    video.mozRequestFullScreen();
+                } else if (video.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) { // IE/Edge
+                    video.msRequestFullscreen();
+                }
             }
         } else {
             console.log('瀏覽器不支援 getUserMedia');
