@@ -73,6 +73,20 @@
     button:active {
       background-color: #3e8e41;
     }
+
+    .source-list {
+      margin-top: 20px;
+    }
+
+    .source-list ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .source-list li {
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 
@@ -83,39 +97,74 @@
       <video id="videoElement" autoplay></video>
     </div>
     <div class="controls-container">
-      <button onclick="startCamera()">Start Video Capture</button>
-      <button onclick="startMicrophone()">Start Audio Capture</button>
+      <button id="startButton">Start</button>
+      <button id="stopButton" disabled>Stop</button>
       <div class="rotate-buttons-container">
         <button onclick="rotateLeft()">Rotate Left 90°</button>
         <button onclick="rotateRight()">Rotate Right 90°</button>
       </div>
     </div>
+    <div class="source-list">
+      <p>Available Sources:</p>
+      <ul id="sourceList"></ul>
+    </div>
   </div>
 
   <script>
     const videoElement = document.getElementById('videoElement');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const sourceList = document.getElementById('sourceList');
     let mediaStream;
     let rotationAngle = 0;
 
     async function startCamera() {
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const constraints = {
+          video: {
+            deviceId: getSelectedDeviceId('videoSelect')
+          }
+        };
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         videoElement.srcObject = mediaStream;
+        startButton.disabled = true;
+        stopButton.disabled = false;
       } catch (error) {
         console.error('Error accessing camera:', error);
       }
     }
 
-    async function startMicrophone() {
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Play audio to start audio capture
-        const audioElement = new Audio();
-        audioElement.srcObject = mediaStream;
-        audioElement.play();
-      } catch (error) {
-        console.error('Error accessing microphone:', error);
+    function stopCamera() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        videoElement.srcObject = null;
+        startButton.disabled = false;
+        stopButton.disabled = true;
       }
+    }
+
+    async function populateDevices() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        devices.forEach((device) => {
+          const option = document.createElement('option');
+          option.value = device.deviceId;
+          option.text = device.label || `Source ${device.deviceId}`;
+
+          if (device.kind === 'videoinput') {
+            videoSelect.appendChild(option);
+          } else if (device.kind === 'audioinput') {
+            audioSelect.appendChild(option);
+          }
+        });
+      } catch (error) {
+        console.error('Error populating devices:', error);
+      }
+    }
+
+    function getSelectedDeviceId(selectId) {
+      const selectElement = document.getElementById(selectId);
+      return selectElement.value;
     }
 
     function rotateLeft() {
@@ -131,6 +180,11 @@
     function updateRotation() {
       videoElement.style.transform = `rotate(${rotationAngle}deg)`;
     }
+
+    startButton.addEventListener('click', startCamera);
+    stopButton.addEventListener('click', stopCamera);
+
+    populateDevices();
   </script>
 </body>
 
