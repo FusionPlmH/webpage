@@ -11,30 +11,73 @@
         #videoElement {
             width: 100%;
             height: 100%;
+            transform: rotate(0deg);
         }
     </style>
 </head>
 <body>
+    <div>
+        <label for="cameraSelect">选择画面来源：</label>
+        <select id="cameraSelect"></select>
+    </div>
+    
+    <div>
+        <button onclick="rotateVideo()">旋转画面</button>
+    </div>
+    
     <video id="videoElement" autoplay></video>
     
     <script>
         var video = document.getElementById('videoElement');
+        var cameraSelect = document.getElementById('cameraSelect');
+        var currentRotation = 0;
         
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(function(stream) {
-                    video.srcObject = stream;
-                    video.addEventListener('loadedmetadata', function() {
-                        video.play();
-                        adjustVideoSize();
-                        window.addEventListener('resize', adjustVideoSize);
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    var cameras = devices.filter(function(device) {
+                        return device.kind === 'videoinput';
                     });
+                    
+                    if (cameras.length > 0) {
+                        cameras.forEach(function(camera, index) {
+                            var option = document.createElement('option');
+                            option.value = camera.deviceId;
+                            option.textContent = '摄像头 ' + (index + 1);
+                            cameraSelect.appendChild(option);
+                        });
+                        
+                        cameraSelect.addEventListener('change', function() {
+                            startCamera(cameraSelect.value);
+                        });
+                        
+                        startCamera(cameras[0].deviceId);
+                    }
                 })
                 .catch(function(error) {
-                    console.log('无法获取摄像头的视频流: ', error);
+                    console.log('无法枚举设备: ', error);
                 });
         } else {
-            console.log('浏览器不支持 getUserMedia');
+            console.log('浏览器不支持 enumerateDevices');
+        }
+        
+        function startCamera(deviceId) {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId } })
+                    .then(function(stream) {
+                        video.srcObject = stream;
+                        video.addEventListener('loadedmetadata', function() {
+                            video.play();
+                            adjustVideoSize();
+                            window.addEventListener('resize', adjustVideoSize);
+                        });
+                    })
+                    .catch(function(error) {
+                        console.log('无法获取摄像头的视频流: ', error);
+                    });
+            } else {
+                console.log('浏览器不支持 getUserMedia');
+            }
         }
         
         // 自动调节视频大小
@@ -51,18 +94,11 @@
             }
         }
         
-        // 切换全屏模式
-        video.addEventListener('click', function() {
-            if (video.requestFullscreen) {
-                video.requestFullscreen();
-            } else if (video.mozRequestFullScreen) { // Firefox
-                video.mozRequestFullScreen();
-            } else if (video.webkitRequestFullscreen) { // Chrome, Safari and Opera
-                video.webkitRequestFullscreen();
-            } else if (video.msRequestFullscreen) { // IE/Edge
-                video.msRequestFullscreen();
-            }
-        });
+        // 旋转视频
+        function rotateVideo() {
+            currentRotation += 90;
+            video.style.transform = 'rotate(' + currentRotation + 'deg)';
+        }
     </script>
 </body>
 </html>
