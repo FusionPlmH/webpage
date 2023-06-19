@@ -54,6 +54,8 @@
         <video id="videoElement" autoplay onclick="toggleFullscreen()"></video>
     </div>
     
+    <div id="deviceSelectors"></div>
+    
     <button onclick="rotateVideo()">旋轉畫面</button>
     
     <script>
@@ -65,27 +67,24 @@
             // 列出所有的媒體設備
             navigator.mediaDevices.enumerateDevices()
                 .then(function(devices) {
-                    var cameras = devices.filter(function(device) {
+                    var videoDevices = devices.filter(function(device) {
                         return device.kind === 'videoinput';
                     });
                     
                     // 選擇鏡頭來源
-                    var cameraSelect = document.createElement('select');
-                    cameras.forEach(function(camera) {
-                        var option = document.createElement('option');
-                        option.value = camera.deviceId;
-                        option.text = camera.label || 'Camera ' + (cameraSelect.length + 1);
-                        cameraSelect.appendChild(option);
+                    var deviceSelectors = document.getElementById('deviceSelectors');
+                    videoDevices.forEach(function(device) {
+                        var button = document.createElement('button');
+                        button.textContent = device.label || 'Camera ' + (deviceSelectors.children.length + 1);
+                        button.onclick = function() {
+                            startCamera(device.deviceId);
+                        };
+                        deviceSelectors.appendChild(button);
                     });
-                    cameraSelect.onchange = function() {
-                        var selectedCameraId = cameraSelect.value;
-                        startCamera(selectedCameraId);
-                    };
-                    document.body.appendChild(cameraSelect);
                     
                     // 預設使用第一個鏡頭
-                    if (cameras.length > 0) {
-                        var defaultCameraId = cameras[0].deviceId;
+                    if (videoDevices.length > 0) {
+                        var defaultCameraId = videoDevices[0].deviceId;
                         startCamera(defaultCameraId);
                     } else {
                         console.log('找不到可用的鏡頭');
