@@ -63,13 +63,27 @@
           video: {
             width: { ideal: 1920 },
             height: { ideal: 1080 },
-            aspectRatio: 16 / 9
+            aspectRatio: calculateAspectRatio()
           }
         };
         const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         videoElement.srcObject = mediaStream;
       } catch (error) {
         console.error('Error accessing camera:', error);
+      }
+    }
+
+    function calculateAspectRatio() {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const windowRatio = windowWidth / windowHeight;
+
+      if (windowRatio >= 1.33) {
+        return 4 / 3; // 宽高比为 4:3
+      } else if (windowRatio >= 1.5) {
+        return 3 / 2; // 宽高比为 3:2
+      } else {
+        return 16 / 9; // 宽高比为 16:9
       }
     }
 
@@ -91,7 +105,10 @@
       handleResize();
     }
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', () => {
+      handleResize();
+      startCamera();
+    });
 
     startCamera();
   </script>
