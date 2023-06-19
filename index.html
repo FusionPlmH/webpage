@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Video Input Test</title>
+  <title>Camera Test</title>
   <style>
     body {
       margin: 0;
@@ -11,10 +11,9 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      overflow: hidden;
     }
 
-    video {
+    #videoElement {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -22,60 +21,59 @@
       transition: transform 0.3s ease;
     }
 
-    button {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 12px 24px;
+    .rotate-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px;
       border: none;
-      border-radius: 4px;
+      border-radius: 50%;
       background-color: #4caf50;
       color: #fff;
       font-size: 16px;
       cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #45a049;
+      z-index: 9999;
     }
   </style>
 </head>
 
 <body>
   <video id="videoElement" autoplay></video>
-  <button id="rotateButton" onclick="rotateVideo()">Rotate 90°</button>
+  <button class="rotate-button" onclick="rotateVideo()">Rotate</button>
 
   <script>
     const videoElement = document.getElementById('videoElement');
-    const rotateButton = document.getElementById('rotateButton');
     let rotationAngle = 0;
 
-    function rotateVideo() {
-      rotationAngle = (rotationAngle + 90) % 360;
-      updateRotation();
-    }
-
-    function updateRotation() {
-      videoElement.style.transform = `rotate(${rotationAngle}deg)`;
-    }
-
-    function handleResize() {
-      const { width, height } = document.body.getBoundingClientRect();
-      const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight;
-
-      if (width / height > videoAspectRatio) {
-        videoElement.style.width = '100%';
-        videoElement.style.height = 'auto';
-      } else {
-        videoElement.style.width = 'auto';
-        videoElement.style.height = '100%';
+    async function startCamera() {
+      try {
+        const constraints = { video: true };
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoElement.srcObject = mediaStream;
+      } catch (error) {
+        console.error('Error accessing camera:', error);
       }
     }
 
-    window.addEventListener('resize', handleResize);
+    function rotateVideo() {
+      rotationAngle = (rotationAngle + 90) % 360;
+      videoElement.style.transform = `rotate(${rotationAngle}deg)`;
+    }
 
-    handleResize();
+    function maximizeVideo() {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.mozRequestFullScreen) {
+        document.documentElement.mozRequestFullScreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen();
+      }
+    }
+
+    startCamera();
+    maximizeVideo();
   </script>
 </body>
 
