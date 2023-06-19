@@ -50,6 +50,29 @@
         #fullscreenButton:hover {
             background-color: #0056b3;
         }
+        
+        #resolutionWrapper {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        #rotationButton {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #rotationButton:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -59,11 +82,20 @@
         <video id="videoElement" autoplay onclick="toggleFullscreen()"></video>
     </div>
     
+    <div id="resolutionWrapper">
+        <label for="resolutionSelect">可用分辨率：</label>
+        <select id="resolutionSelect" onchange="changeResolution(this.value)"></select>
+    </div>
+    
     <button id="fullscreenButton" onclick="toggleFullscreen()">全屏播放</button>
+    
+    <button id="rotationButton" onclick="rotateVideo()">旋转90度</button>
     
     <script>
         var video = document.getElementById('videoElement');
         var fullscreenButton = document.getElementById('fullscreenButton');
+        var resolutionSelect = document.getElementById('resolutionSelect');
+        var currentRotation = 0;
         
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: true })
@@ -71,6 +103,7 @@
                     video.srcObject = stream;
                     video.addEventListener('loadedmetadata', function() {
                         fullscreenButton.style.display = 'block';
+                        getAvailableResolutions();
                     });
                 })
                 .catch(function(error) {
@@ -78,6 +111,43 @@
                 });
         } else {
             console.log('浏览器不支持 getUserMedia');
+        }
+        
+        // 获取可用分辨率
+        function getAvailableResolutions() {
+            if (video.srcObject) {
+                var track = video.srcObject.getVideoTracks()[0];
+                var capabilities = track.getCapabilities();
+                var resolutions = capabilities.width;
+                populateResolutionSelect(resolutions);
+            }
+        }
+        
+        // 填充可用分辨率下拉列表
+        function populateResolutionSelect(resolutions) {
+            resolutionSelect.innerHTML = '';
+            resolutions.forEach(function(resolution) {
+                var option = document.createElement('option');
+                option.value = resolution;
+                option.textContent = resolution;
+                resolutionSelect.appendChild(option);
+            });
+        }
+        
+        // 切换分辨率
+        function changeResolution(resolution) {
+            if (video.srcObject) {
+                var track = video.srcObject.getVideoTracks()[0];
+                var constraints = track.getConstraints();
+                constraints.width = resolution;
+                track.applyConstraints(constraints)
+                    .then(function() {
+                        console.log('分辨率已更改为: ' + resolution);
+                    })
+                    .catch(function(error) {
+                        console.log('无法更改分辨率: ', error);
+                    });
+            }
         }
         
         // 切换全屏模式
@@ -91,6 +161,12 @@
             } else if (video.msRequestFullscreen) { // IE/Edge
                 video.msRequestFullscreen();
             }
+        }
+        
+        // 旋转视频
+        function rotateVideo() {
+            currentRotation += 90;
+            video.style.transform = 'rotate(' + currentRotation + 'deg)';
         }
     </script>
 </body>
